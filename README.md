@@ -1,6 +1,6 @@
 ### DCN: Deep Clustering Network
 
-Forked from xuyxu (https://github.com/xuyxu/Deep-Clustering-Network)
+Forked from guenthereder (https://github.com/guenthereder/Deep-Clustering-Network)
 
 ### Results
 
