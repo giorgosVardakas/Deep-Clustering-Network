@@ -1,6 +1,0 @@
-.ipy*
-__py*
-datasets/MNIST
-datasets/FashionMNIST
-datasets/FashionMNIST_5
-datasets/10x_73k
