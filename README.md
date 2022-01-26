@@ -1,8 +1,9 @@
-### DCN: Deep Clustering Network Mnist Dataset
+### DCN: Deep Clustering Network
 
 Forked from guenthereder (https://github.com/guenthereder/Deep-Clustering-Network)
 
-### Results
+### Results on Mnist dataset
+
 
 
 | NMI | ARI | parameters |
