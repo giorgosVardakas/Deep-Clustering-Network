@@ -166,6 +166,7 @@ def get_synthetic_dataloader(batch_size=64):
 
 	return dataloader, data_shape
 
+# TODO
 def get_newsgroups_dataloader(batch_size=64, data_points=-1):
 	#pdb.set_trace()
 	vectorizer = TfidfVectorizer()
