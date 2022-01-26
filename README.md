@@ -1,4 +1,4 @@
-### DCN: Deep Clustering Network
+### DCN: Deep Clustering Network Mnist Dataset
 
 Forked from guenthereder (https://github.com/guenthereder/Deep-Clustering-Network)
 
