@@ -7,7 +7,31 @@ from sklearn.metrics import adjusted_rand_score, accuracy_score
 from sklearn.metrics import normalized_mutual_info_score
 from torch.utils.data import Subset
 from datasets.datasets import get_wine_dataloader
+from typing import Optional
 import pdb
+
+def cluster_accuracy(y_true, y_predicted, cluster_number: Optional[int] = None):
+	"""
+	Calculate clustering accuracy after using the linear_sum_assignment function in SciPy to
+	determine reassignments.
+
+	:param y_true: list of true cluster numbers, an integer array 0-indexed
+	:param y_predicted: list of predicted cluster numbers, an integer array 0-indexed
+	:param cluster_number: number of clusters, if None then calculated from input
+	:return: reassignment dictionary, clustering accuracy
+	"""
+	if cluster_number is None:
+		# assume labels are 0-indexed
+		cluster_number = (max(y_predicted.max(), y_true.max()) + 1)
+	count_matrix = np.zeros((cluster_number, cluster_number), dtype=np.int64)
+	for i in range(y_predicted.size):
+		count_matrix[y_predicted[i], y_true[i]] += 1
+
+	row_ind, col_ind = linear_assignment(count_matrix.max() - count_matrix)
+	reassignment = dict(zip(row_ind, col_ind))
+	accuracy = count_matrix[row_ind, col_ind].sum() / y_predicted.size
+	return reassignment, accuracy
+
 
 def transform_clusters_to_labels(clusters, labels):
 	# Find the cluster ids (labels)
@@ -46,14 +70,17 @@ def evaluate(model, train_loader):
 	clusters = np.vstack(clusters).reshape(-1)
 	predicted_labels = transform_clusters_to_labels(clusters, labels)
 
-	ACC = accuracy_score(labels, predicted_labels)
+	pdb.set_trace()
+	ACC = cluster_accuracy(labels, clusters)
+	PURITY = accuracy_score(labels, predicted_labels)
 	NMI = normalized_mutual_info_score(labels, clusters)
 	ARI = adjusted_rand_score(labels, clusters)
-	return (ACC, NMI, ARI)
+	return (ACC, PURITY, NMI, ARI)
 
 
 def solver(args, model, train_loader):
 	rec_loss_list = model.pretrain(train_loader, args.pre_epoch)
+	pur_list = []
 	acc_list = []
 	nmi_list = []
 	ari_list = []
@@ -63,14 +90,15 @@ def solver(args, model, train_loader):
 		model.fit(e, train_loader)
 
 		model.eval()
-		ACC, NMI, ARI = evaluate(model, train_loader)  # evaluation on test_loader
+		ACC, PURITY, NMI, ARI = evaluate(model, train_loader)  # evaluation on test_loader
 		acc_list.append(ACC)
+		pur_list.append(PURITY)
 		nmi_list.append(NMI)
 		ari_list.append(ARI)
 
-		print('Epoch: {:02d} | ACC: {:.3f} | NMI: {:.3f} | ARI: {:.3f}\n'.format(e, ACC, NMI, ARI))
+		print('Epoch: {:02d} | ACC: {:.2f} | PURITY: {:.2f} | NMI: {:.2f} | ARI: {:.2f}\n'.format(e, ACC, PURITY, NMI, ARI))
 
-	return rec_loss_list, acc_list, nmi_list, ari_list
+	return rec_loss_list, acc_list, pur_list, nmi_list, ari_list
 
 
 if __name__ == '__main__':
@@ -107,4 +135,4 @@ if __name__ == '__main__':
 	
 	# Main body
 	model = DCN(args)    
-	rec_loss_list, acc_list, nmi_list, ari_list = solver(args, model, train_loader)
+	rec_loss_list, acc_list, pur_list, nmi_list, ari_list = solver(args, model, train_loader)
