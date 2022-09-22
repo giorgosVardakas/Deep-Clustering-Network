@@ -10,7 +10,7 @@ import pandas as pd
 import scipy.sparse
 import scipy.io
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-from sklearn.datasets import fetch_20newsgroups, make_circles
+from sklearn.datasets import fetch_20newsgroups, make_circles, make_moons, fetch_olivetti_faces, make_blobs
 from sklearn.feature_extraction.text import TfidfVectorizer
 #from datapackage import Package
 import pdb
@@ -19,6 +19,83 @@ import pdb
 drop_last = True
 shuffle = False
 IMG_SIZE = 28
+
+def get_dermatology_np():
+	na_column = 33
+	labels_column = 34
+	df = pd.read_csv("./datasets/Dermatology/dermatology.data", delimiter=",", header=None, na_values="?")
+	mean_value = df[na_column].mean()
+	df[na_column].fillna(value=mean_value, inplace=True)
+
+	labels = df[labels_column]
+	data = df.drop(columns=[labels_column])
+	data = np.array(data)
+
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+
+	labels = np.array(labels)
+	label_encoder = LabelEncoder()
+	labels = label_encoder.fit_transform(labels)
+	labels = labels.astype("int")
+	total_size = data.shape[0]
+	random_permutation = np.random.permutation(np.arange(total_size))
+	data = data[random_permutation]
+	labels = labels[random_permutation]
+	return data, labels
+
+def get_dermatology_dataloader(batch_size=64):
+	data, labels = get_dermatology_np()
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+	return dataloader, data_shape
+
+def get_ecoil_np():
+	column_names = ["id", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "label"]
+
+	df = pd.read_csv("./datasets/Ecoli/ecoli.data", delimiter="\s+", header=None, names=column_names)
+	data = df[["f1", "f2", "f3", "f4", "f5", "f6", "f7"]]
+	labels = df["label"]
+
+	data = np.array(data)
+	labels = np.array(labels)
+	label_encoder = LabelEncoder()
+	labels = label_encoder.fit_transform(labels)
+	labels = labels.astype("int")
+
+	total_size = data.shape[0]
+	random_permutation = np.random.permutation(np.arange(total_size))
+	data = data[random_permutation]
+	labels = labels[random_permutation]
+
+	return data, labels
+
+def get_ecoil_dataloader(batch_size=64):
+	data, labels = get_ecoil_np()
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+	return dataloader, data_shape
+
+def get_olivetti_faces_np():
+	data_home = "./datasets/Olivetti-Faces"
+	data, labels = fetch_olivetti_faces(data_home=data_home, return_X_y=True, shuffle=True)
+	return data, labels
+
+def get_olivetti_faces_dataloader(batch_size=64):
+	data, labels = get_olivetti_faces_np()
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+	return dataloader, data_shape
 
 def get_australian_np():
 	column_names = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14", "label"]
@@ -90,8 +167,9 @@ def get_wine_dataloader(batch_size=89):
 
 	return dataloader, data_shape
 
-def get_ring_np():
-	data, labels = make_circles(n_samples=1_000, factor=0.3, noise=0.05, random_state=0)
+def get_rings_np():
+	data, labels = make_circles(n_samples=1000, factor=0.3, noise=0.05, random_state=0)
+	#data, labels = make_circles(n_samples=300, factor=0.1, noise=0.02, random_state=0)
 	scaler = MinMaxScaler()
 	data = scaler.fit_transform(data)
 	data = data.astype("float")
@@ -99,7 +177,158 @@ def get_ring_np():
 	return data, labels
 
 def get_rings_dataloader(batch_size=64):
-	data, labels = get_ring_np()
+	data, labels = get_rings_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_single_ring_np():
+	data, labels = make_circles(n_samples=1000, factor=0.3, noise=0.05, random_state=0)
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	labels = labels.astype("int")
+
+	outter_circle_label = 0
+	indexs = np.where(labels == outter_circle_label)[0]
+	data = data[indexs]
+	labels = labels[indexs]
+	return data, labels
+
+def get_single_ring_dataloader(batch_size=64):
+	data, labels = get_single_ring_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_moons_np():
+	data, labels = make_moons(n_samples=1_000, noise=0.05, random_state=0)
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	labels = labels.astype("int")
+	return data, labels
+
+def get_moons_dataloader(batch_size=64):
+	data, labels = get_moons_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_rings_gauss_np():
+	circles, circles_labels = make_circles(n_samples=250, factor=0.3, noise=0.05, random_state=0)
+	blobs, blobs_labels = make_blobs(n_samples=250, centers=[(-2, 0), (2, 0)], cluster_std=((0.15, 0.15), (0.15, 0.15)))
+	#circles, circles_labels = make_moons(n_samples=250, noise=0.05, random_state=0)
+	#blobs, blobs_labels = make_blobs(n_samples=250, centers=[(-2, 0)], cluster_std=[(0.15, 0.15)])
+	blobs_labels += 2
+
+	data = np.vstack((circles,blobs))
+	labels = np.concatenate((circles_labels, blobs_labels))
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	labels = labels.astype("int")
+	return data, labels
+
+def get_rings_gauss_dataloader(batch_size=64):
+	data, labels = get_rings_gauss_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_squeezed_gauss_np():
+	# Do not normilize!
+	data, labels = make_blobs(n_samples=1000, centers=[(0.45, 0.5), (0.55, 0.5)], cluster_std=((0.005, 0.15), (0.005, 0.15)))
+	data = data.astype("float")
+	labels = labels.astype("int")
+	return data, labels
+
+def get_squeezed_gauss_dataloader(batch_size=100):
+	data, labels = get_squeezed_gauss_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_gauss_densities_np():
+	big_blob, big_blob_label = make_blobs(n_samples=500, centers=[(0, 0)], cluster_std=[(0.25, 1.5)])
+	small_x = 3.5
+	small_y = 2.5
+	small_blobs, small_blobs_labels = make_blobs(n_samples=100, centers=[(small_x, small_y), (small_x, -small_y)], cluster_std=((0.15, 0.15), (0.15, 0.15)))
+	small_blobs_labels += 1
+
+	data = np.vstack((big_blob, small_blobs))
+	labels = np.concatenate((big_blob_label, small_blobs_labels))
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	labels = labels.astype("int")
+
+	total_size = data.shape[0]
+	random_permutation = np.random.permutation(np.arange(total_size))
+	data = data[random_permutation]
+	labels = labels[random_permutation]
+
+	return data, labels
+
+def get_gauss_densities_dataloader(batch_size=100):
+	data, labels = get_gauss_densities_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
+def get_gaussian_blobs_np():
+	data, labels = make_blobs(n_samples=500, centers=[(0, 0), (10, 0)], cluster_std=((1, 1), (1, 1)))
+	#data, labels = make_blobs(n_samples=500, centers=1)
+
+	total_size = data.shape[0]
+	random_permutation = np.random.permutation(np.arange(total_size))
+	data = data[random_permutation]
+	labels = labels[random_permutation]
+
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	labels = labels.astype("int")
+	return data, labels
+
+def get_gaussian_blobs_dataloader(batch_size=100):
+	data, labels = get_gaussian_blobs_np()
 
 	# Convert to tensor dataset
 	data = torch.Tensor(data)
@@ -142,12 +371,12 @@ def get_iris_dataloader(batch_size=50):
 	data_shape = data.shape[1]
 	labels = torch.Tensor(labels)
 	final_dataset = TensorDataset(data, labels)
-	del data, labels, df
 	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
 
 	return dataloader, data_shape
 
-def get_synthetic_dataloader(batch_size=64):
+
+def get_synthetic_np():
 	data = np.load("./datasets/Synthetic/synthetic.npy")
 	labels = np.load("./datasets/Synthetic/synthetic_labels.npy")
 	total_size = data.shape[0]
@@ -156,17 +385,20 @@ def get_synthetic_dataloader(batch_size=64):
 	data = data[random_permutation]
 	labels = labels[random_permutation]
 
+	return data, labels
+
+def get_synthetic_dataloader(batch_size=64):
+	data, labels = get_synthetic_np()
+
 	# Convert to tensor dataset
 	data = torch.Tensor(data)
 	data_shape = data.shape[1]
 	labels = torch.Tensor(labels)
 	final_dataset = TensorDataset(data, labels)
-	del data, labels
 	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
 
 	return dataloader, data_shape
 
-# TODO
 def get_newsgroups_dataloader(batch_size=64, data_points=-1):
 	#pdb.set_trace()
 	vectorizer = TfidfVectorizer()
@@ -227,7 +459,7 @@ def get_10x_73k_np(data_points=-1):
 
 	return data, labels
 
-def get_10x_73k_dataloader(batch_size=64, data_points=-1):
+def get_10x_73k(batch_size=64, data_points=-1):
 	data, labels = get_10x_73k_np(data_points=data_points)
 	# Convert to tensor dataset
 	data = torch.Tensor(data)
@@ -355,7 +587,7 @@ def get_MNIST_subset_np(create_subset=False, data_per_pattern=1000):
 	# Load data
 	data = np.load("datasets/MNIST/MNIST_subset/MNIST.npy")
 	labels = np.load("datasets/MNIST/MNIST_subset/MNIST_labels.npy")
-	
+
 	return data, labels
 
 def get_MNIST_subset_dataloader(batch_size=64, create_subset=False, data_per_pattern=1000):
@@ -367,6 +599,13 @@ def get_MNIST_subset_dataloader(batch_size=64, create_subset=False, data_per_pat
 	final_dataset = TensorDataset(data, labels)
 	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
 	return dataloader
+
+def get_MNIST_cnn_embeddings_dataloader(batch_size=200):
+	# Convert to tensor dataset
+	datashape = 490
+	final_dataset = torch.load("datasets/MNIST/MNIST_cnn_embeddings/MNIST_cnn_embeddings.pt")
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+	return dataloader, datashape
 
 def get_fashionMNIST_np(create_subset=False, data_per_pattern=1000):
 	if(create_subset):

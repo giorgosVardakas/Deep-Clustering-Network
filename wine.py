@@ -8,6 +8,7 @@ from sklearn.metrics import normalized_mutual_info_score
 from torch.utils.data import Subset
 from datasets.datasets import get_wine_dataloader
 from typing import Optional
+from scipy.optimize import linear_sum_assignment as linear_assignment
 import pdb
 
 def cluster_accuracy(y_true, y_predicted, cluster_number: Optional[int] = None):
@@ -70,8 +71,8 @@ def evaluate(model, train_loader):
 	clusters = np.vstack(clusters).reshape(-1)
 	predicted_labels = transform_clusters_to_labels(clusters, labels)
 
-	pdb.set_trace()
-	ACC = cluster_accuracy(labels, clusters)
+	labels = labels.astype("int")
+	ACC = cluster_accuracy(labels, clusters)[1]
 	PURITY = accuracy_score(labels, predicted_labels)
 	NMI = normalized_mutual_info_score(labels, clusters)
 	ARI = adjusted_rand_score(labels, clusters)
