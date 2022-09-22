@@ -112,7 +112,7 @@ if __name__ == '__main__':
 	parser.add_argument('--wd', type=float, default=5e-4, help='weight decay (default: 5e-4)')
 	parser.add_argument('--batch-size', type=int, default=256, help='input batch size for training')
 	parser.add_argument('--epoch', type=int, default=50, help='number of epochs to train')
-	parser.add_argument('--pre-epoch', type=int, default=5, help='number of pre-train epochs')
+	parser.add_argument('--pre-epoch', type=int, default=1000, help='number of pre-train epochs')
 
 	parser.add_argument('--pretrain', type=bool, default=True, help='whether use pre-training')
 	
