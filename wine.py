@@ -112,16 +112,16 @@ if __name__ == '__main__':
 	# Training parameters
 	parser.add_argument('--lr', type=float, default=0.002, help='learning rate (default: 1e-4)')
 	parser.add_argument('--wd', type=float, default=5e-4, help='weight decay (default: 5e-4)')
-	parser.add_argument('--batch-size', type=int, default=100, help='input batch size for training')
+	parser.add_argument('--batch-size', type=int, default=89, help='input batch size for training')
 	parser.add_argument('--epoch', type=int, default=50, help='number of epochs to train')
-	parser.add_argument('--pre-epoch', type=int, default=50, help='number of pre-train epochs')
+	parser.add_argument('--pre-epoch', type=int, default=300, help='number of pre-train epochs')
 	parser.add_argument('--pretrain', type=bool, default=True, help='whether use pre-training')
 	
 	# Model parameters
 	parser.add_argument('--lamda', type=float, default=0.005, help='coefficient of the reconstruction loss')
 	parser.add_argument('--beta', type=float, default=1, help='coefficient of the regularization term on clustering')
 	parser.add_argument('--hidden-dims', default=[30], help='learning rate (default: 1e-4)')
-	parser.add_argument('--latent-dim', type=int, default=3, help='latent space dimension')
+	parser.add_argument('--latent-dim', type=int, default=2, help='latent space dimension')
 	parser.add_argument('--n-clusters', type=int, default=3, help='number of clusters in the latent space')
 	parser.add_argument('--clustering', type=str, default='kmeans', help='choose a clustering method (default: kmeans) meanshift, tba')
 

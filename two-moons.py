@@ -6,7 +6,7 @@ from torchvision import datasets, transforms
 from sklearn.metrics import adjusted_rand_score, accuracy_score
 from sklearn.metrics import normalized_mutual_info_score
 from torch.utils.data import Subset
-from datasets.datasets import get_rings_dataloader
+from datasets.datasets import get_moons_dataloader
 from typing import Optional
 from scipy.optimize import linear_sum_assignment as linear_assignment
 import pdb
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# Load data
-	train_loader, datashape = get_rings_dataloader(args.batch_size)
+	train_loader, datashape = get_moons_dataloader(args.batch_size)
 	
 	# Main body
 	model = DCN(args)    
