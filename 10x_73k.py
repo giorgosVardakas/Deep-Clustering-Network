@@ -132,8 +132,8 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	# Load data
-	train_loader, datashape = get_10x_73k(args.batch_size, -1)
-	
+	train_loader, datashape = get_10x_73k(args.batch_size, 50_000)
+
 	# Main body
 	model = DCN(args)    
 	rec_loss_list, acc_list, pur_list, nmi_list, ari_list = solver(args, model, train_loader)
