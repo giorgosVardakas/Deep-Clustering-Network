@@ -62,6 +62,10 @@ def get_ecoil_np():
 	labels = df["label"]
 
 	data = np.array(data)
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+	data = data.astype("float")
+	
 	labels = np.array(labels)
 	label_encoder = LabelEncoder()
 	labels = label_encoder.fit_transform(labels)
