@@ -171,6 +171,27 @@ def get_wine_dataloader(batch_size=89):
 
 	return dataloader, data_shape
 
+def get_four_guassian_np():
+	data, labels = make_blobs(centers=[(0, 0), (0, 10), (10, 0), (10, 10)], n_samples=1_000)
+	label_enc = LabelEncoder()
+	labels = label_enc.fit_transform(labels)
+	scaler = MinMaxScaler()
+	data = scaler.fit_transform(data)
+
+	return data, labels
+
+def get_four_guassian_dataloader(batch_size=200):
+	data, labels = get_four_guassian_np()
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	data_shape = data.shape[1]
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
+
+	return dataloader, data_shape
+
 def get_rings_np():
 	data, labels = make_circles(n_samples=1000, factor=0.3, noise=0.05, random_state=0)
 	#data, labels = make_circles(n_samples=300, factor=0.1, noise=0.02, random_state=0)
@@ -653,3 +674,16 @@ def get_fashionMNIST_subset_dataloader(batch_size=64, create_subset=False, data_
 	final_dataset = TensorDataset(data, labels)
 	dataloader = DataLoader(final_dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
 	return dataloader
+
+
+def load_anscient_characters(batch_size=64):
+	data = np.load("datasets/Ancient_characters/data.npy")
+	labels = np.load("datasets/Ancient_characters/labels.npy")
+
+	# Convert to tensor dataset
+	data = torch.Tensor(data)
+	labels = torch.Tensor(labels)
+	final_dataset = TensorDataset(data, labels)
+	dataloader = DataLoader(final_dataset, batch_size=batch_size)
+	return dataloader
+	
